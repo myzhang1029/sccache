@@ -160,13 +160,13 @@ impl CacheRead {
                 // Write the cache entry to a tempfile and then atomically
                 // move it to its final location so that other rustc invocations
                 // happening in parallel don't see a partially-written file.
-                match (NamedTempFile::new_in(dir), optional) {
+                match dbg!((NamedTempFile::new_in(dir), optional)) {
                     (Ok(mut tmp), _) => {
                         match (self.get_object(&key, &mut tmp), optional) {
                             (Ok(mode), _) => {
-                                tmp.persist(&path)?;
+                                dbg!(tmp.persist(&path))?;
                                 if let Some(mode) = mode {
-                                    set_file_mode(path.as_path(), mode)?;
+                                    dbg!(set_file_mode(path.as_path(), mode))?;
                                 }
                             }
                             (Err(e), false) => return Err(e),
@@ -177,9 +177,9 @@ impl CacheRead {
                     (Err(e), false) => {
                         // Fall back to writing directly to the final location
                         warn!("Failed to create temp file on the same file system: {e}");
-                        let mut f = std::fs::File::create(&path)?;
+                        let mut f = dbg!(std::fs::File::create(&path))?;
                         // `optional` is false in this branch, so do not ignore errors
-                        let mode = self.get_object(&key, &mut f)?;
+                        let mode = dbg!(self.get_object(&key, &mut f))?;
                         if let Some(mode) = mode {
                             if let Err(e) = set_file_mode(path.as_path(), mode) {
                                 // Here we ignore errors from setting file mode because
@@ -363,7 +363,7 @@ mod tests {
             let result = cache_read.extract_objects(objects, pool).await;
             assert!(
                 result.is_ok(),
-                "Extracting to /dev/fd/{raw_fd} should succeed"
+                "Extracting to /dev/fd/{raw_fd} should succeed, {result:?}"
             );
             let mut buf = vec![0; data.len()];
             let n = receiver.read_exact(&mut buf).await.unwrap();
