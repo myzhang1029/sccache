@@ -177,7 +177,7 @@ impl CacheRead {
                     (Err(e), false) => {
                         // Fall back to writing directly to the final location
                         warn!("Failed to create temp file on the same file system: {e}");
-                        let mut f = dbg!(std::fs::OpenOptions::new().write(true).open(&path))?;
+                        let mut f = dbg!(std::fs::File::create(&path))?;
                         // `optional` is false in this branch, so do not ignore errors
                         let mode = dbg!(self.get_object(&key, &mut f))?;
                         if let Some(mode) = mode {
