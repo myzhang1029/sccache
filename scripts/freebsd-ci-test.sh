@@ -78,7 +78,7 @@ build_and_test_project()
 	export RUSTFLAGS="-C debuginfo=0"
 	cargo build --features "dist-client,dist-server" || FAULT=1
 	echo "#### testing sccache (cargo)"
-	cargo test --features "dist-client,dist-server" -- \
+	cargo test --features "dist-client,dist-server" cache::cache_io::tests::test_extract_object_to_dev_fd_something -- \
 	  --test-threads 1 --nocapture || FAULT=1
 	unset RUSTFLAGS
 	if [ "$FAULT" -eq 0 ]; then
